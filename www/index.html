@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
     <title></title>
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
@@ -20,34 +22,63 @@
 
     <!-- your app's js -->
     <script src="js/app.js"></script>
+    <script src="js/controllers.js"></script>
   </head>
-  <body ng-app="tcpTestApp" ng-controller="tcpTestCtrl">
+  <body ng-app="tcpTestApp" ng-controller="tcpController">
     <ion-pane>
-      <ion-header-bar class="bar-dark" align-title="center">
+      <ion-header-bar class="bar-dark has-tabs-top" align-title="center">
         <h1 class="title">{{header}}</h1>
       </ion-header-bar>
-      <ion-content>
-        <button class="button button-block button-balanced" ng-click="connectTCP()">
-          Connect
-        </button>
-        <button class="button button-block button-light" ng-click="setHeader(&apos;Hello World!&apos;)">
-          Say Hello
-        </button>
-        <button class="button button-block button-light" ng-click="setHeader(&apos;Goodbye World!&apos;)">
-          Say Goodbye
-        </button>
 
-        <div class="card">
-          <div class="item item-text-wrap">
-            <div>
-              {{cardInfo}}
-            </div>
-            <div>
-              <b>Current Status:</b> {{cardStatus}}
+      <!-- Screen Content Area -->
+      <ion-tabs class="tabs-dark tabs-icon-only tabs-top">
+
+        <ion-tab title="Home" icon-on="ion-ios-filing" icon-off="ion-ios-filing-outline">
+          <!-- Info card -->
+          <div class="card">
+            <div class="item item-text-wrap">
+              <div>
+                {{cardInfo}}
+              </div>
+              <div>
+                <b>Current Status:</b> {{cardStatus}}
+              </div>
             </div>
           </div>
-        </div>
-      </ion-content>
+
+          <!-- TCP Action Buttons -->
+          <div class="row">
+            <button class="button col button-balanced" ng-click="connectTCP()" style="margin-left: 2%; margin-right: 1%">
+              Connect
+            </button>
+            <button class="button col button-assertive" ng-click="disconnectTCP()" style="margin-left: 1%; margin-right: 2%">
+              Disconnect
+            </button>
+          </div>
+          <div class="row">
+            <button class="button button-block button-outline button-dark" ng-click="setHeader(&apos;Hello World!&apos;)" style="margin-left: 2%; margin-right: 1%">
+              Send Hello
+            </button>
+            <button class="button button-block button-outline button-dark" ng-click="setHeader(&apos;Goodbye World!&apos;)" style="margin-left: 1%; margin-right: 2%">
+              Send Goodbye
+            </button>
+
+          </div>
+        </ion-tab>
+
+        <ion-tab title="About" icon-on="ion-ios-clock" icon-off="ion-ios-clock-outline">
+          <!-- Tab 2 content -->
+        </ion-tab>
+
+        <ion-tab title="Settings" icon-on="ion-ios-gear" icon-off="ion-ios-gear-outline">
+          <!-- Tab 3 content -->
+        </ion-tab>
+
+      </ion-tabs>
+      <!-- <ion-content>
+
+
+      </ion-content> -->
 
       <div class="bar bar-footer" ng-class="{
         &apos;bar-assertive&apos;: footer==&apos;Disconnected&apos;,
