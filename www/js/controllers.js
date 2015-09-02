@@ -6,12 +6,12 @@ angular.module('tcpTestApp.controllers', [])
   $scope.tcpConnection = {
     'isConnected': false, // To be honest, I'm not sure why I'm using this
     'socketId': 0,
-    'ip': '192.168.137.1', // Default IP address and port
+    'ip': '192.168.137.1',
     'port': 1338
   };
 
   // Update strings
-  $scope.header = 'BLUControl';
+  $scope.header = 'Click a button!';
   $scope.footer = 'Disconnected';
   $scope.cardInfo = 'No info to display';
   $scope.cardStatus = 'Waiting for connect';
@@ -29,15 +29,6 @@ angular.module('tcpTestApp.controllers', [])
   // Converts a UTF8 encoded array buffer to string
   function ab2str(buf) {
     return String.fromCharCode.apply(null, new Uint8Array(buf));
-  }
-
-  // Callback to be used for the TCP onReceive event
-  // Defined here so that we can remove the listener when the connection is killed
-  function tcpOnReceiveCallback(info) {
-    // When we get data, log it and show it in the card
-    console.log('We have received data:', info);
-    $scope.setCardInfo('Data recieved on socket ' + info.socketId + ': ' + ab2str(info.data));
-    $scope.$apply();
   }
 
   // Connect to the TCP server
@@ -83,18 +74,22 @@ angular.module('tcpTestApp.controllers', [])
                   $scope.setCardStatus('TCP Error', result);
                   $scope.$apply();
                 }
-              });
-            });
+              })
+            })
 
-            // Callback for incomming data
-            chrome.sockets.tcp.onReceive.addListener(tcpOnReceiveCallback);
+            // Wait for data
+            chrome.sockets.tcp.onReceive.addListener(function(info) {
+              // When we get data, log it and show it in the card
+              console.log('We have received data:', info);
+              $scope.setCardInfo('Data recieved on socket ' + info.socketId + ': ' + ab2str(info.data));
+              $scope.$apply();
+            })
           } else {
             // Notify if a connection does in fact exist
             console.log('A TCP connection already exists');
             $scope.setCardInfo('A connection already exists');
-            $scope.$apply();
           }
-        });
+        })
 
     } else {
       // Notify if the tcp plugin or cordova is not present
@@ -103,81 +98,39 @@ angular.module('tcpTestApp.controllers', [])
       $scope.cardStatus = 'No TCP instance';
     }
 
-  };
+  }
 
   // Disconnect the currently used TCP connection and close the socket
   // NOTE: This assumes there is only one socket open and hence only one connection
   $scope.disconnectTCP = function() {
-    if (window.cordova && window.chrome.sockets.tcp) {
-      // Check to see if there are actually any connections
-      chrome.sockets.tcp.getSockets(function(socketInfos) {
-        // If there is a connection, kill it
-        if (socketInfos.length !== 0) {
-          // Get rid of the original listener so that we do not end up with multiple
-          chrome.sockets.tcp.onReceive.removeListener(tcpOnReceiveCallback);
+    // Check to see if there are actually any connections
+    chrome.sockets.tcp.getSockets(function(socketInfos) {
+      // If there is a connection, kill it
+      if (socketInfos.length != 0) {
+        chrome.sockets.tcp.disconnect($scope.tcpConnection.socketId);
+        chrome.sockets.tcp.close($scope.tcpConnection.socketId);
+        $scope.tcpConnection.isConnected = false;
+        $scope.setFooter('Disconnected');
+        $scope.setCardStatus('Waiting for connect');
+        $scope.$apply();
+      }
+    })
+  }
 
-          // Disconnect the TCP connection
-          chrome.sockets.tcp.disconnect($scope.tcpConnection.socketId);
-
-          // Close the socket (does not seem to work for some reason)
-          chrome.sockets.tcp.close($scope.tcpConnection.socketId);
-          $scope.tcpConnection.isConnected = false;
-          $scope.setFooter('Disconnected');
-          $scope.setCardStatus('Waiting for connect');
-          $scope.$apply();
-        }
-      });
-    } else {
-      // Notify if the tcp plugin or cordova is not present
-      console.log('No Cordova found here!');
-      $scope.setFooter('Plugin not running');
-      $scope.cardStatus = 'No TCP instance';
-    }
-  };
-
-  // Send a string over the current TCP connection
-  $scope.sendTCP = function(message) {
-    if (window.cordova && window.chrome.sockets.tcp) {
-      // Check to see if there are actually any connections
-      chrome.sockets.tcp.getSockets(function(socketInfos) {
-        // If there is a connection, kill it
-        if (socketInfos.length !== 0) {
-          chrome.sockets.tcp.send($scope.tcpConnection.socketId, str2ab(message), function(sendInfo) {
-            if (sendInfo.resultCode >= 0) {
-              // If the send was successful, notify
-              $scope.setCardInfo('Message/command sent!');
-              console.log('Message/command sent!');
-            } else {
-              // If the send was not successful, also notify
-              $scope.setCardInfo('Message/command sending failed!');
-              console.log('Message/command sending failed!');
-            }
-          });
-        }
-      });
-    } else {
-      // Notify if the tcp plugin or cordova is not present
-      console.log('No Cordova found here!');
-      $scope.setFooter('Plugin not running');
-      $scope.cardStatus = 'No TCP instance';
-    }
-
-  };
-
-  // == Setters (I'm not sure if this way of doing things is even necessary)
+  // == Setters (I'm nto sure if this way of doing things is even necessary)
   $scope.setFooter = function(newFooter) {
     $scope.footer = newFooter;
-  };
+  }
 
   $scope.setHeader = function(newHeader) {
     $scope.header = newHeader;
-  };
+  }
 
   $scope.setCardStatus = function(newCardStatus) {
     $scope.cardStatus = newCardStatus;
-  };
+  }
 
   $scope.setCardInfo = function(newCardInfo) {
     $scope.cardInfo = newCardInfo;
-  };
+  }
 });
