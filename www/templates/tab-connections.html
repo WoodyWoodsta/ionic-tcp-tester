@@ -1,0 +1,45 @@
+<!-- Content: Connections Tab -->
+<ion-view view-title="Connections">
+  <ion-content scroll="true" over-scroll="true" has-bouncing="true">
+    <div class="card">
+      <div class="item item-text-wrap">
+        <div>
+          {{cardInfo}}
+        </div>
+        <div>
+          <b>Current Status:</b> {{cardStatus}}
+        </div>
+      </div>
+    </div>
+
+    <div class="list list-inset">
+      <label class="item item-input item-input">
+        <span class="input-label">IP Address</span>
+        <input type="text" placeholder="192.168.137.1" ng-model="tcpConnection.ip">
+      </label>
+      <label class="item item-input item-input">
+        <span class="input-label">Port</span>
+        <input type="number" placeholder="1338" ng-model="tcpConnection.port">
+      </label>
+    </div>
+
+    <!-- TCP Action Buttons -->
+    <div class="row">
+      <button class="button col button-balanced" ng-click="connectTCP()" style="margin-left: 2%; margin-right: 1%">
+        Connect
+      </button>
+      <button class="button col button-assertive" ng-click="disconnectTCP()" style="margin-left: 1%; margin-right: 2%">
+        Disconnect
+      </button>
+    </div>
+    <div class="row">
+      <button class="button button-block button-outline button-dark" ng-click="sendTCP('Hello!')" style="margin-left: 2%; margin-right: 1%">
+        Send Hello
+      </button>
+      <button class="button button-block button-outline button-dark" ng-click="sendTCP('Goodbye')" style="margin-left: 1%; margin-right: 2%">
+        Send Goodbye
+      </button>
+
+    </div>
+  </ion-content>
+</ion-view>
